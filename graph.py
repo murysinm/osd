@@ -11,7 +11,7 @@ def read_data(filename):
 
             block_info = list(map(int, line.split()))
 
-            w_max = float(file.readline().strip())
+            w_max = int(file.readline().strip())
 
             points = []
             while True:
