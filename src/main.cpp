@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
   for (auto& t: threads) {
     t.join();
   }
-  std::cout << "E_b / N_0 (db) | World/error rate" << std::endl;
+  std::cout << "E_b / N_0 (db) | Word/error rate" << std::endl;
   for (size_t i = 0; i < ebn0_vals.size(); ++i) {
     std::cout << std::left << std::setw(16) << ebn0_vals[i] << " " << wers[i] << '\n';
   }
