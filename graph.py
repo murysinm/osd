@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
 
 def read_data(filename):
     with open(filename, 'r') as file:
@@ -38,7 +37,7 @@ def plot_graph(blocks):
 
     plt.yscale('log')
     plt.xlabel('E_b / N_0 (db)')
-    plt.ylabel('World/error rate')
+    plt.ylabel('Word/error rate')
     plt.legend()
     plt.grid(True, which="both", ls="--", linewidth=0.5)
 
