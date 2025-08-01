@@ -8,10 +8,30 @@
 #include <limits>
 #include <ranges>
 
+namespace {
+
+template <typename Container, std::ranges::range R>
+auto to(R&& r) {
+  Container v;
+
+  // if we can get a size, reserve that much
+  if constexpr (requires { std::ranges::size(r); }) {
+    v.reserve(std::ranges::size(r));
+  }
+
+  // push all the elements
+  for (auto&& e : r) {
+    v.push_back(static_cast<decltype(e)&&>(e));
+  }
+
+  return v;
+}
+
+}
+
 std::pair<vec2, std::vector<double>> decompose(const std::vector<double>& msg) {
-  auto alpha = msg | std::views::transform([](const auto& val) { return val < 0; }) | std::ranges::to<vec2>();
-  auto beta = msg | std::views::transform([](const auto& val) { return std::abs(val); }) |
-              std::ranges::to<std::vector<double>>();
+  auto alpha = to<vec2>(msg | std::views::transform([](const auto& val) { return val < 0; }));
+  auto beta = to<std::vector<double>>(msg | std::views::transform([](const auto& val) { return std::abs(val); }));
   return {alpha, beta};
 }
 
@@ -29,7 +49,11 @@ double calc_metric(const vec2& alpha, const std::vector<double>& beta, const vec
 vec2 osd(const std::vector<double>& msg, const matrix& g, size_t w_max) {
   auto [alpha, beta] = decompose(msg);
 
-  auto indexed = std::ranges::views::enumerate(beta) | std::ranges::to<std::vector>();
+  std::vector<std::pair<size_t, double>> indexed;
+  indexed.reserve(beta.size());
+  for (size_t i = 0; i < beta.size(); ++i) {
+    indexed.emplace_back(i, beta[i]);
+  }
 
   std::ranges::sort(indexed, [](auto&& fi, auto&& sec) {
     auto&& [i1, el1] = fi;
@@ -37,8 +61,7 @@ vec2 osd(const std::vector<double>& msg, const matrix& g, size_t w_max) {
     return el1 > el2;
   });
 
-  auto inverted_pi = indexed | std::views::transform([](auto&& p) { return static_cast<size_t>(std::get<0>(p)); }) |
-                     std::ranges::to<std::vector>();
+  auto inverted_pi = to<std::vector<size_t>>(indexed | std::views::transform([](auto&& p) { return std::get<0>(p); }));
 
   auto pi = invert_permutation(inverted_pi);
 
